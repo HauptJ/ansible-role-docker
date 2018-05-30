@@ -1,0 +1,43 @@
+---
+  # Install Docker
+
+- name: Add Docker Stable repo
+  yum_repository:
+    name: docker-ce-stable
+    description: Docker CE Stable - $basearch
+    baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
+    gpgkey: https://download.docker.com/linux/centos/gpg
+    gpgcheck: yes
+    enabled: yes
+    state: present
+
+- name: install the latest stable version of docker-ce
+  yum:
+    name: docker-ce
+    state: latest
+
+- name: Start Docker
+  service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Add {{ user }} user to docker group
+  user:
+    name: '{{ user }}'
+    groups: docker
+    append: yes
+
+- name: Download and install Docker Compose {{ docker_compose_ver }}
+  get_url:
+    url: 'https://github.com/docker/compose/releases/download/{{ docker_compose_ver }}/docker-compose-Linux-x86_64'
+    dest: '/usr/local/bin/docker-compose'
+    mode: 0755
+
+- name: Initialize Docker Swarm Master
+  command: "docker swarm init --advertise-addr {{ docker_swarm_master_ip }}"
+  when: docker_swarm_state == master
+
+- name: Connect Worker Node to Docker Swarm Master Server
+  command: "docker swarm join --token {{ docker_swarm_join_token }} {{ docker_swarm_master_ip }}:{{ docker_swarm_master_port }}"
+  when: docker_swarm_state == manager OR docker_swarm_state == worker
