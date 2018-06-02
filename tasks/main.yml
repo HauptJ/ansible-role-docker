@@ -45,4 +45,4 @@
 
 - name: Connect Worker Node to Docker Swarm Master Server
   command: "docker swarm join --token {{ docker_swarm_join_token }} {{ docker_swarm_master_ip }}:{{ docker_swarm_master_port }}"
-  when: docker_swarm_state == "manager" or docker_swarm_state == "worker"
+  when: docker_swarm_state == "minion" 
