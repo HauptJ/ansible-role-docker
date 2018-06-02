@@ -22,9 +22,9 @@
     state: started
     enabled: true
 
-- name: Add {{ user }} user to docker group
+- name: Add {{ docker_user }} user to docker group
   user:
-    name: '{{ user }}'
+    name: '{{ docker_user }}'
     groups: docker
     append: yes
 
