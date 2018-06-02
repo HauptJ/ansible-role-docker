@@ -28,6 +28,11 @@
     groups: docker
     append: yes
 
+- name: Enable IPv6
+  copy:
+    src: files/daemon.json
+    dest: /etc/docker/daemon.json
+
 - name: Download and install Docker Compose {{ docker_compose_ver }}
   get_url:
     url: 'https://github.com/docker/compose/releases/download/{{ docker_compose_ver }}/docker-compose-Linux-x86_64'
