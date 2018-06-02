@@ -114,45 +114,6 @@ Vagrant.configure("2") do |config|
 
   end
 
-
-  config.vm.define "docker_local" do |docker_local|
-    docker_local.vm.box = $docker_local_hv_box
-    docker_local.vm.box_version = $docker_local_hv_box_ver
-
-  	docker_local.vm.provider "hyperv" do |hv|
-  		hv.vmname = $docker_local_vmname
-  		# With nested virtualization, at least 2 CPUs are needed.
-  		hv.cpus = $docker_local_vcpus
-  		# With nested virtualization, at least 4GB of memory is needed.
-  		hv.memory = $docker_local_vmem
-      # Faster cloning and uses less disk space
-      hv.differencing_disk = true
-      # Mac Address
-      hv.mac = $docker_local_mac
-  	end
-
-    docker_local.vm.provision "shell", inline: <<-SHELL
-    # Setup Jenkins directory
-    mkdir -p /data/jenkins
-    chown -R 1000:1000 /data/jenkins
-    # Setup AWX directory
-    mkdir -p /data/awx
-    chown -R 999:999 /data/awx
-    # Setup Docker Swarm
-    docker swarm init --advertise-addr 192.168.1.20
-    pushd /vagrant
-    # Deploy Jenkins
-    docker stack deploy -c jenkins-stack.yml jenkins
-    # Deploy AWX
-    docker stack deploy -c awx-stack.yml awx
-    popd
-    ID=$(docker container ls -q -f "label=com.docker.swarm.service.name=jenkins_jenkins")
-    docker container exec -it $ID cat /var/jenkins_home/secrets/initialAdminPassword
-    chown -R vagrant:vagrant /vagrant
-    SHELL
-
-  end
-
   # View the documentation for the provider you are using for more
   # information on available options.
 
