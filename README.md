@@ -1,7 +1,7 @@
 # ansible-role-docker
 Ansible role to install Docker and optionally configure Docker Swarm
 
-[![Build Status] **Coming soon**
+[![Build Status](https://travis-ci.org/HauptJ/ansible-role-docker.svg?branch=master)](https://travis-ci.org/HauptJ/ansible-role-docker)
 
 ## Requirements
 - Ansible 2.3+
