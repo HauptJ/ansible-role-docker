@@ -37,6 +37,7 @@
 - name: Create volumes directory
   file:
     path: '{{ ansible_env.HOME }}/volumes'
+    state: directory
 
 - name: Download and install Docker Compose {{ docker_compose_ver }}
   get_url:
