@@ -29,10 +29,29 @@
     append: yes
 
 - name: Enable IPv6
-  copy:
-    src: files/daemon.json
+  template:
+    src: templates/daemon.json
     dest: /etc/docker/daemon.json
   tags: ipv6
+
+- name: Fix Kimsurfi IPv6 Subnet Conf
+  lineinfile:
+    path: /etc/sysconfig/network-scripts/ifcfg-eth0
+    create: yes
+    state: present
+    regexp: '^IPV6ADDR='
+    line: 'IPV6ADDR={{ docker_host_ipv6_subnet }}'
+  tags:
+    - ipv6
+    - kimsurfi
+
+- name: restart the server
+  import_tasks: restart.yml
+  tags:
+    - restart
+    - ipv6
+    - kimsurfi
+
 
 - name: Create volumes directory
   file:
