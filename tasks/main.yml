@@ -16,11 +16,11 @@
     name: docker-ce
     state: latest
 
-- name: Start Docker
-  service:
-    name: docker
-    state: started
-    enabled: true
+# - name: Start Docker
+#   service:
+#     name: docker
+#     state: started
+#     enabled: true
 
 - name: Add {{ docker_user }} user to docker group
   user:
@@ -28,11 +28,11 @@
     groups: docker
     append: yes
 
-# - name: Enable IPv6
-#   template:
-#     src: templates/daemon.json
-#     dest: /etc/docker/daemon.json
-#   tags: ipv6
+- name: Enable IPv6
+  template:
+    src: templates/daemon.json
+    dest: /etc/docker/daemon.json
+  tags: ipv6
 
 - name: Fix Kimsurfi IPv6 Subnet Conf
   lineinfile:
@@ -77,3 +77,4 @@
     name: docker
     state: started
     enabled: yes
+  ignore_errors: true
