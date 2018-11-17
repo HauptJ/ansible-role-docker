@@ -16,11 +16,11 @@
     name: docker-ce
     state: latest
 
-# - name: Start Docker
-#   service:
-#     name: docker
-#     state: started
-#     enabled: true
+- name: Start Docker
+  service:
+    name: docker
+    state: started
+    enabled: true
 
 - name: Add {{ docker_user }} user to docker group
   user:
@@ -77,4 +77,3 @@
     name: docker
     state: started
     enabled: yes
-  ignore_errors: true
