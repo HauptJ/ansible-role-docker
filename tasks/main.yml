@@ -13,7 +13,7 @@
         enabled: yes
         state: present
 
-    - name: install the latest stable version of docker-ce
+    - name: Install the latest stable version of docker-ce on CentOS
       yum:
         name: docker-ce
         state: latest
@@ -32,7 +32,7 @@
         enabled: yes
         state: present
 
-    - name: install the latest stable version of docker-ce
+    - name: Install the latest stable version of docker-ce on Fedora
       dnf:
         name: docker-ce
         state: latest
