@@ -1,20 +1,43 @@
 ---
   # Install Docker
 
-- name: Add Docker Stable repo
-  yum_repository:
-    name: docker-ce-stable
-    description: Docker CE Stable - $basearch
-    baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
-    gpgkey: https://download.docker.com/linux/centos/gpg
-    gpgcheck: yes
-    enabled: yes
-    state: present
+- name: Install Docker-CE on CentOS
+  block:
+    - name: Add Docker Stable repo for CentOS
+      yum_repository:
+        name: docker-ce-stable
+        description: Docker CE Stable - $basearch
+        baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
+        gpgkey: https://download.docker.com/linux/centos/gpg
+        gpgcheck: yes
+        enabled: yes
+        state: present
 
-- name: install the latest stable version of docker-ce
-  yum:
-    name: docker-ce
-    state: latest
+    - name: install the latest stable version of docker-ce
+      yum:
+        name: docker-ce
+        state: latest
+
+  when: ansible_distribution == 'CentOS'
+
+- name: Install Docker-CE on Fedora
+  block:
+    - name: Add Docker Stable repo
+      yum_repository:
+        name: docker-ce-stable
+        description: Docker CE Stable - $basearch
+        baseurl: https://download.docker.com/linux/fedora/$releasever/$basearch/stable
+        gpgkey: https://download.docker.com/linux/fedora/gpg
+        gpgcheck: yes
+        enabled: yes
+        state: present
+
+    - name: install the latest stable version of docker-ce
+      dnf:
+        name: docker-ce
+        state: latest
+
+  when: ansible_distribution == 'Fedora'
 
 - name: Start Docker
   service:
@@ -28,30 +51,21 @@
     groups: docker
     append: yes
 
-- name: Enable IPv6
+- name: Enable IPv6, journald, and overlay2
+  template:
+    src: templates/daemon_ipv6.json
+    dest: /etc/docker/daemon.json
+  notify: restart docker
+  when: docker_enable_ipv6 == "true"
+  tags:
+    - ipv6
+
+- name: Enable journald, and overlay2
   template:
     src: templates/daemon.json
     dest: /etc/docker/daemon.json
-  tags: ipv6
-
-- name: Fix Kimsurfi IPv6 Subnet Conf
-  lineinfile:
-    path: /etc/sysconfig/network-scripts/ifcfg-eth0
-    create: yes
-    state: present
-    regexp: '^IPV6ADDR='
-    line: 'IPV6ADDR={{ docker_host_ipv6_subnet }}'
-  tags:
-    - ipv6
-    - kimsurfi
-
-- name: restart the server
-  import_tasks: restart.yml
-  tags:
-    - restart
-    - ipv6
-    - kimsurfi
-
+  notify: restart docker
+  when: docker_enable_ipv6 != "true"
 
 - name: Create volumes directory
   file:
@@ -67,13 +81,9 @@
 - name: Initialize Docker Swarm Master
   command: "docker swarm init --advertise-addr {{ docker_swarm_master_ip }}"
   when: docker_swarm_state == "master"
+  notify: restart docker
 
 - name: Connect Worker Node to Docker Swarm Master Server
   command: "docker swarm join --token {{ docker_swarm_join_token }} {{ docker_swarm_master_ip }}:{{ docker_swarm_master_port }}"
   when: docker_swarm_state == "minion"
-
-- name: Docker service state
-  service:
-    name: docker
-    state: started
-    enabled: yes
+  notify: restart docker
