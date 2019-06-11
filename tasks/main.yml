@@ -50,6 +50,7 @@
     name: '{{ docker_user }}'
     groups: docker
     append: yes
+  when: docker_user != "vagrant" AND docker_user != "root"
 
 - name: Enable IPv6, journald, and overlay2
   template:
@@ -57,8 +58,8 @@
     dest: /etc/docker/daemon.json
   notify: restart docker
   when: docker_enable_ipv6 == "true"
-  tags:
-    - ipv6
+  # tags:
+  #   - ipv6
 
 - name: Enable journald, and overlay2
   template:
