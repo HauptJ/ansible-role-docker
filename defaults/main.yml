@@ -1,5 +1,5 @@
 docker_user: vagrant
-docker_compose_ver: 1.23.2
+docker_compose_ver: 1.24.1
 docker_swarm_state: disabled
 docker_swarm_master_ip: 127.0.0.1
 docker_swarm_master_port: 2377

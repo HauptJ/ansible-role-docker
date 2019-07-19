@@ -3,7 +3,7 @@
 
 - name: Install Docker-CE on CentOS
   block:
-    - name: Add Docker Stable repo for CentOS
+    - name: Add Docker Stable repo for CentOS 7 or RHEL 7
       yum_repository:
         name: docker-ce-stable
         description: Docker CE Stable - $basearch
@@ -13,12 +13,12 @@
         enabled: yes
         state: present
 
-    - name: Install the latest stable version of docker-ce on CentOS
+    - name: Install the latest stable version of docker-ce on CentOS 7 or RHEL 7
       yum:
         name: docker-ce
         state: latest
 
-  when: ansible_distribution == 'CentOS'
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
 - name: Install Docker-CE on Fedora
   block:
@@ -57,16 +57,16 @@
     src: templates/daemon_ipv6.json
     dest: /etc/docker/daemon.json
   notify: restart docker
-  when: docker_enable_ipv6 == "true"
-  # tags:
-  #   - ipv6
+  when: ansible_kernel >= "4.0" AND docker_enable_ipv6 == "true"
+  tags:
+    - ipv6
 
 - name: Enable journald, and overlay2
   template:
     src: templates/daemon.json
     dest: /etc/docker/daemon.json
   notify: restart docker
-  when: docker_enable_ipv6 != "true"
+  when: ansible_kernel >= "4.0" 
 
 - name: Create volumes directory
   file:
